@@ -1,0 +1,24 @@
+name: "Build"
+on:
+  workflow_dispatch: {}
+  # Build a new image every week
+  schedule:
+    # Sunday 3:41 AM is a random moment in the week that I expect is the lowest
+    # load for GH. No idea if true.
+    - cron: '41 3 * * 0'
+jobs:
+  digitalocean:
+    timeout-minutes: 300
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: DeterminateSystems/nix-installer-action@v9
+    - uses: DeterminateSystems/magic-nix-cache-action@main
+    - name: Build DO image
+      run: |
+        nix-build digitalocean-image.nix
+    - uses: "actions/upload-artifact@v4"
+      name: "Upload image artifact"
+      with:
+        name: "nixos-digitalocean-x86_64-linux-${{ github.sha }}.qcow2.gz"
+        path: "result/nixos.qcow2.gz"
