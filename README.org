@@ -1,0 +1,20 @@
+#+title: NixOS images built using Github Actions
+
+Every Sunday the latest DigitalOcean image is built and uploaded as a release. You can download it here:
+
+https://github.com/hraban/nixos-images/releases/download/latest/nixos-digitalocean-x86_64-linux.qcow.gz
+
+You can upload it to DigitalOcean like this:
+
+#+begin_src shell
+url='https://github.com/hraban/nixos-images/releases/download/latest/nixos-digitalocean-x86_64-linux.qcow.gz'
+read -s DIGITALOCEAN_ACCESS_TOKEN
+export DIGITALOCEAN_ACCESS_TOKEN
+doctl compute image create nixos-nixpkgs-unstable --image-url "$url" --region your-desired-region
+#+end_src
+
+DigitalOcean will download the image directly from GitHub and print its ID. After a few minutes you can use it to create a new droplet:
+
+#+begin_src shell
+doctl compute droplet create my-nixos-droplet ... --image $img your-image-id
+#+end_src
