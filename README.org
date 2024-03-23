@@ -4,9 +4,22 @@ Every Sunday the latest DigitalOcean image is built and uploaded as a release. Y
 
 https://github.com/hraban/nixos-images/releases/download/latest/nixos-digitalocean-x86_64-linux.qcow.gz
 
+* Motivation
+
+This allows me to create tiny DigitalOcean droplets with an up-to-date NixOS system.
+
+Features:
+
+1. No uploading an image from my computer to DigitalOcean (I would need to use a Linux virtual machine, and I have slow upload speed, so it’s a lot of work and it takes too long)
+2. Support for small 512MiB RAM droplets (eval’ing nixpkgs takes too much memory on a tiny droplet; without swap enabled you’ll never be able to actually switch to new config)
+3. Easy way to keep the boot images up to date (I don’t want to wait 50 minutes while it processes 3 months of updates on boot)
+
+
+DigitalOcean can download images from a remote URL as long as that URL meets some requirements. Thankfully, GitHub release assets work well for this.
+
 * Example
 
-You can upload it to DigitalOcean like this:
+You can upload a new image to DigitalOcean like this:
 
 #+begin_src shell
 url='https://github.com/hraban/nixos-images/releases/download/latest/nixos-digitalocean-x86_64-linux.qcow.gz'
@@ -20,13 +33,14 @@ doctl compute image create nixos-nixpkgs-unstable \
       --region $region
 #+end_src
 
-DigitalOcean will download the image directly from GitHub and print its ID. After a few minutes you can use it to create a new droplet. Make sure to always import the same base configuration that was used to build this image.
+DigitalOcean will download the image directly from GitHub and print its ID. After a few minutes you can use it to create a new droplet.
 
 Minimal example NixOS config:
 
 #+begin_src nix
 { pkgs, ... }: {
   imports = [
+    # If you’re unsure about this line: keep it.
     (builtins.fetchurl "https://raw.githubusercontent.com/hraban/nixos-images/master/digitalocean-config.nix")
   ];
   environment.systemPackages = [ pkgs.hello ];
