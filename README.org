@@ -27,7 +27,7 @@ Minimal example NixOS config:
 #+begin_src nix
 { pkgs, ... }: {
   imports = [
-    (builtins.fetchurl "https://raw.githubusercontent.com/hraban/nixos-images/staging/digitalocean-config.nix")
+    (builtins.fetchurl "https://raw.githubusercontent.com/hraban/nixos-images/master/digitalocean-config.nix")
   ];
   environment.systemPackages = [ pkgs.hello ];
 }
