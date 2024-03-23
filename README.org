@@ -4,17 +4,61 @@ Every Sunday the latest DigitalOcean image is built and uploaded as a release. Y
 
 https://github.com/hraban/nixos-images/releases/download/latest/nixos-digitalocean-x86_64-linux.qcow.gz
 
+* Example
+
 You can upload it to DigitalOcean like this:
 
 #+begin_src shell
 url='https://github.com/hraban/nixos-images/releases/download/latest/nixos-digitalocean-x86_64-linux.qcow.gz'
+# Pick from $ doctl compute region list
+region=nyc1
 read -s DIGITALOCEAN_ACCESS_TOKEN
 export DIGITALOCEAN_ACCESS_TOKEN
-doctl compute image create nixos-nixpkgs-unstable --image-url "$url" --region your-desired-region
+doctl compute image create nixos-nixpkgs-unstable \
+      --image-url "$url" \
+      --tag-names nixos \
+      --region $region
 #+end_src
 
-DigitalOcean will download the image directly from GitHub and print its ID. After a few minutes you can use it to create a new droplet:
+DigitalOcean will download the image directly from GitHub and print its ID. After a few minutes you can use it to create a new droplet. Make sure to always import the same base configuration that was used to build this image.
+
+Minimal example NixOS config:
+
+#+begin_src nix
+{ pkgs, ... }: {
+  imports = [
+    (builtins.fetchurl "https://raw.githubusercontent.com/hraban/nixos-images/staging/digitalocean-config.nix")
+  ];
+  environment.systemPackages = [ pkgs.hello ];
+}
+#+end_src
+
+Save that in =do-userdata.nix=, now you can create a fresh droplet:
 
 #+begin_src shell
-doctl compute droplet create my-nixos-droplet ... --image $img your-image-id
+# your image id
+img=12345
+# pick a size from: $ doctl compute size list
+size=s-1vcpu-512mb-10gb
+# Your pre-registered SSH key. $ doctl compute ssh-key list
+ssh=54321
+doctl compute droplet create mymachine \
+      --size $size \
+      --image $img \
+      --ssh-keys $ssh \
+      --tag-name nix \
+      --wait \
+      --region $region \
+      --user-data-file ./do-userdata.nix
 #+end_src
+
+Wait for your machine to boot and load the fresh config, and you can:
+
+#+begin_example
+$ doctl compute ssh mymachine
+
+[root@mymachine:~]# hello
+Hello, world!
+#+end_example
+
+If the machine has booted but doesn’t seem to have applied your custom config, it’s either still working or it failed to apply it. You can check the logs using =systemctl=.
