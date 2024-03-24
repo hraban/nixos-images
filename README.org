@@ -38,6 +38,22 @@ DigitalOcean will download the image directly from GitHub and print its ID. Afte
 Minimal example NixOS config:
 
 #+begin_src nix
+# When passed as userdata, this config will be activated on boot by a
+# digitalocean nixos droplet.
+
+# This next comment line makes the default digitalocean nix image userdata
+# handler update the channels:
+
+### https://nixos.org/channels/nixos-unstable nixos
+
+# Remove it if you don’t want that.
+
+# Source: https://github.com/NixOS/nixpkgs/blob/a3ed7406349a9335cb4c2a71369b697cecd9d351/nixos/modules/virtualisation/digital-ocean-init.nix#L59-L91
+
+# N.B.: that trick only works if this is passed as userdata to a fresh DO
+# droplet. If used from within a flake on a remote builder it’s obviously not
+# necessary in the first place because you’re using the host’s lock file.
+
 { pkgs, ... }: {
   imports = [
     # If you’re unsure about this line: keep it.
