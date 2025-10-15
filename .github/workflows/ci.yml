@@ -29,7 +29,7 @@ jobs:
     - name: Build DO image
       run: |
         nix-build digitalocean-image.nix
-        cp result/nixos.qcow2.gz nixos-digitalocean-x86_64-linux.qcow.gz
+        cp result/*.qcow2.gz nixos-digitalocean-x86_64-linux.qcow.gz
     - uses: "actions/upload-artifact@v4"
       name: "Upload image artifact"
       with:
