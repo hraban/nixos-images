@@ -36,3 +36,10 @@ jobs:
         prerelease: false
         files: |
           nixos-digitalocean-x86_64-linux.qcow.gz
+
+  nocommit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nobssoftware/nocommit@v1
+        name: nocommit
